@@ -1,4 +1,20 @@
 require('dotenv').config();
+
+// Polyfill for File and Blob (required by undici/cheerio in Node < 20)
+if (typeof global.Blob === 'undefined') {
+    const buffer = require('buffer');
+    global.Blob = buffer.Blob;
+}
+if (typeof global.File === 'undefined') {
+    const buffer = require('buffer');
+    global.File = class File extends global.Blob {
+        constructor(parts, filename, options = {}) {
+            super(parts, options);
+            this.filename = filename;
+            this.lastModified = options.lastModified || Date.now();
+        }
+    };
+}
 const express = require('express');
 const cors = require('cors');
 const ytSearch = require('yt-search');
